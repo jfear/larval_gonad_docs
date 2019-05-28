@@ -1,12 +1,9 @@
 ---
-title: "Testis X Chromosome Expression"
+title: "Larval Testis Documentation"
 type: docs
 ---
 
-## This is the front page
+# Larval Testis Documentation
 
-Ea _furtique_ risere fratres edidit terrae magis. Colla tam mihi tenebat:
-miseram excita suadent es pecudes iam. Concilio _quam_ velatus posset ait quod
-nunc! Fragosis suae dextra geruntur functus vulgata.
-
-
+This is the landing page for the larval testis documentation.
+Please navigate content using the menu on the left.
