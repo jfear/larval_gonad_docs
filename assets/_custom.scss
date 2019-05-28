@@ -1,0 +1,48 @@
+$container-max-width: 100rem;
+$menu-width: 18rem;
+$toc-width: 18rem;
+
+.container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+}
+
+.book-menu {
+  flex: 0 0 $menu-width;
+  font-size: $font-size-14;
+
+  nav {
+    width: $menu-width;
+    padding: $padding-16;
+
+    @include fixed;
+  }
+
+  @include dark-links;
+}
+
+.book-toc {
+  flex: 0 0 $toc-width;
+  font-size: $font-size-12;
+
+  nav {
+    width: $toc-width;
+    padding: $padding-16;
+
+    @include fixed;
+  }
+
+  nav > ul > li:first-child {
+    margin-top: 0;
+  }
+
+  // Classes to hide nested levels of ToC (can be replaced by @for, but it's more clear like this)
+  &.level-1 ul ul,
+  &.level-2 ul ul ul,
+  &.level-3 ul ul ul ul,
+  &.level-4 ul ul ul ul ul,
+  &.level-5 ul ul ul ul ul ul,
+  &.level-6 ul ul ul ul ul ul ul {
+    display: none;
+  }
+}
