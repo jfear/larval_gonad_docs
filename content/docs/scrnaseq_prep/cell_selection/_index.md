@@ -33,7 +33,8 @@ Cells are called using total UMI count:
 After cell selection `Cell Ranger` aligns reads using `STAR`.
 It counts the number of reads per gene and provides summary statistics.
 
-### Cell Ranger (v2.1.1)
+### Cell Ranger (v2.1.1) 
+{{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}}
 
 10X Genomics suggests a capture rate of ~50% of cells loaded. We expect to capture at least 3,000 cells for each replicate. 
 Using v2.1.1 of `Cell Ranger` with default settings we capture ~500 cells per replicate (below). 
@@ -53,6 +54,8 @@ Therefore, we decided to try forcing the algorithm to call additional cells.
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_summary.png">}}{{% /expand%}}
 
 ### Cell Ranger (v2.1.1; `--force-cells`)
+{{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
+
 `Cell Ranger` provides a way to force a certain number of cells to be called.
 We ran `Cell Ranger` using this option to force the calling of 3,000 cells for replicates 1 and 2 where we loaded ~6,000 cells. 
 We loaded ~16,000 cells in replicate 3 so we force 8,000 cells to be called.
@@ -71,6 +74,9 @@ Replicates 2 and 3 had ~20,000,000 more reads than replicate 1.
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_force_summary.png">}}{{% /expand%}}
 
 ### Cell Ranger (v3.0.2)
+<!-- TODO: Change code link. -->
+{{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
+
 10X recently released v3 of their `Cell Ranger` software.
 In this version they boast a better cell calling with low RNA content.  
 
