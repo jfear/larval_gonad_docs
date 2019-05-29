@@ -33,16 +33,33 @@ Cells are called using total UMI count:
 After cell selection `Cell Ranger` aligns reads using `STAR`.
 It counts the number of reads per gene and provides summary statistics.
 
-### Cell Ranger (v2.1.1)
+
+10X Genomics suggested an expected capture rate of ~50% of cells loaded. 
+This table shows our expectations as well as the number of reads sequenced for each replicate.
+
+**Table 1. Expectations for cell capture and read counts.**
+
+| Rep | Approx Num Cells Loaded | Expected Num Cells Captured | Num of Reads |
+|-----|-------------------------|-----------------------------|--------------|
+| Testis 1 | 6,000 | 3,000 | 119,932,060 |
+| Testis 2 | 6,000 | 3,000 | 148,921,414 |
+| Testis 3 | 16,000 | 8,000 | 131,590,010 |
+
+---
+
+### 1. Cell Ranger (v2.1.1)
 {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}}
 
-10X Genomics suggests a capture rate of ~50% of cells loaded. We expect to capture at least 3,000 cells for each replicate.
-Using v2.1.1 of `Cell Ranger` with default settings we capture ~500 cells per replicate (below).
-The barcode rank plots indicate a long sloped decrease (left to right) with a knee appearing around 100 UMI.
-We think `Cell Ranger` is under calling cells.
-10X reported on their website that the v2 of their cell calling algorithm struggles when there is a high diversity of RNA content.
+When we started this project v2.1.1 was the most recent.
+We began by running with default parameters.
+While reading the documentation, I saw where 10X reported that v2 of their cell calling algorithm struggles when there is a high diversity of RNA content.
 In our data we expect a high diversity of RNA content because we are looking at stem cells, germ cells, and somatic cells.
-Therefore, we decided to try forcing the algorithm to call additional cells.
+We ended up capturing ~500 cells per replicate (below).
+The barcode rank plots indicate a long sloped decrease (left to right) with a knee appearing around 100 UMI.
+Cells were only called at the high end of the plot suggesting that `Cell Ranger` was not calling cells with low RNA content.
+We think `Cell Ranger` is under calling cells (**Table 1**).
+10X Genomics website suggests the use of the `--force-cells` option to increase the number of cells that they call.
+Therefore, instead of using these cell calls we decided to try forcing the algorithm to call additional cells (next section).
 
 #### Testis Replicate 1
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis1_summary.png" width="100%">}}{{% /expand%}}
@@ -53,16 +70,15 @@ Therefore, we decided to try forcing the algorithm to call additional cells.
 #### Testis Replicate 3
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_summary.png" width="100%">}}{{% /expand%}}
 
-### Cell Ranger (v2.1.1; `--force-cells`)
+---
+
+### 2. Cell Ranger Force (v2.1.1)
 {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
 
-`Cell Ranger` provides a way to force a certain number of cells to be called.
-We ran `Cell Ranger` using this option to force the calling of 3,000 cells for replicates 1 and 2 where we loaded ~6,000 cells.
-We loaded ~16,000 cells in replicate 3 so we force 8,000 cells to be called.
+We ran `cell ranger --force-cells` using the expected number of cells captures (**Table 1**).
 Again looking at the barcode rank plots we see that cells were called all the way to the middle of the linear portion of the distribution (~ ≥1,000 UMI).
-The median total UMI per cell ranged from 1,091-5,429.
-The median number of genes per cell ranged from 546-1,120.
-Replicates 2 and 3 had ~20,000,000 more reads than replicate 1.
+Here the median total UMI per cell ranged from 1,091 -- 5,429, and the median number of genes per cell ranged from 546 -- 1,120.
+Replicates 2 and 3 had ~20 million more reads than replicate 1.
 
 #### Testis Replicate 1
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis1_force_summary.png" width="100%">}}{{% /expand%}}
@@ -73,14 +89,21 @@ Replicates 2 and 3 had ~20,000,000 more reads than replicate 1.
 #### Testis Replicate 3
 {{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_force_summary.png" width="100%">}}{{% /expand%}}
 
-### Cell Ranger (v3.0.2)
+---
+
+### 3. Cell Ranger (v3.0.2)
 <!-- TODO: Change code link. -->
 {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
 
-10X recently released v3 of their `Cell Ranger` software.
+Recently 10X Genomics released v3 of their software.
 In this version they boast a better cell calling with low RNA content.
+Indeed, we see a higher number of cells captured compared to v2. 
+Replicate 1 had 174 fewer cells than using forced settings.
+This resulted in a slightly higher number of genes per cell.
+Conversely, replicate 2 and 3 added thousands of more cells.
+This caused a slight increase in the fraction of reads in a cell.
+Using the new software version seems less ad hoc than setting a `--force-cells` value.
 
-<!-- TODO: add cellranger 3 figures. -->
 #### Testis Replicate 1
 {{%expand "click to expand"%}}{{<figure src="cellranger3_testis1_summary.png" width="100%">}}{{% /expand%}}
 
