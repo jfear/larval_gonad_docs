@@ -46,3 +46,21 @@ $toc-width: 18rem;
     display: none;
   }
 }
+
+h1, h2, h4 {
+  font-weight: bold !important;
+}
+
+h3 {
+  font-style: italic !important;
+}
+
+.book-tabs {
+  border: 1px solid gray;
+}
+
+.book-tabs input[type=radio]:checked+label {
+  color: black;
+  font-weight: bold;
+  border-bottom: 2px solid #004ed0;
+}
