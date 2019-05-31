@@ -1,114 +1,191 @@
 ---
-title: "10X Cell Selection"
+title: "Cell Selection"
 weight: 1
 # bookFlatSection: false
 # bookShowToC: true
 ---
+# Cell Selection
+
+## TL;DR
+
+**Problem:** Identify individual cells from scRNA-Seq data.
+
+Cell selection is variable with different parameters and versions.
+Cell ranger v2 with default parameters under performs returning ~500 cells per replicate.
+Cell ranger v2 with the `--force-cells` option forces the returning of the expected number of cells for each replicate, but this is rather *ad hoc*.
+Cell ranger v3 with default options returns the expected number of cells or more. 
+This seems less *ad hoc* than using the `--force-cells` option, but maybe over calling the number of cells especially in replicates 2 and 3.
+Also the addition of low count cells seems to muddle cluster calling in downstream analysis. 
+While similar clusters are identified, irrespective of this step, clusters called from cell ranger v2 `--force-cells` have better separation and representation of known markers from the literature.
+
+## Overview
 
 {{<figure src="https://cdn.technologynetworks.com/tn/images/thumbs/webp/640_360/10x-genomics-extends-their-application-portfolio-305346.webp?v=9720678"
-title="The 10X Library Preparation consists of mixing individual cells with individual gel beads." width="100%">}}
+caption="**Figure 1. The 10X Library Preparation consists of mixing individual cells with individual gel beads.**" width="80%">}}
 
-## Barcode Rank Plots
+After sequencing, the first step in scRNA-Seq analysis is to identify individual cells.
+On the 10X Genomics platform, libraries are prepared by combining individual cells with individual beads (**Figure 1.**).
+Each bead contains a unique barcode which is used for demultiplexing cells.
+The goal of cell selection is to find beads that have 1 and only 1 cell.
+The majority of beads will be empty because cells are loaded using a double Poisson distribution.
+However, empty cells may still have signal due to RNA in the media.
+In theoretically rare cases a bead may be combined with 2 or more cells.
+This could be caused by incomplete dissociation or loading of 2 separate cells in the same bead.
+This is particularly problematic when the 2+ cells are all from the same cell-type.
 
-After sequencing, the first step in scRNA-Seq analysis is identifying cells.
-During library preparation, individual cells are mixed with individual beads.
-Each bead contains a unique barcode which is used for demultiplexing.
-The goal of cell selection is to find beads that had 1 and only 1 cell.
-Because cells are loaded in a double Poisson rate, the majority of beads will be empty.
-However, these empty cells may still have some signal due to RNA in the media.
-In rare cases a bead may be combined with 2 or more cells.
-This is particularly problematic when the 2+ cells are all from the same cell type.
-
-10X Genomics provides their own software for demultiplexing and identifying cells (`Cell Ranger`).
-This software does demultiplexes reads to the cell level.
-Cells are called using total UMI count:
-
->Cell Ranger v3 ([website](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/algorithms/overview))
-
->1. Uses a cutoff based on total UMI counts of each barcode to identify cells. This step identifies the primary mode of high RNA content cells.
->2. Then the algorithm uses the RNA profile of each remaining barcode to determine if it is an “empty" or a cell containing partition. This second step captures low RNA content cells whose total UMI counts may be similar to empty GEMs.
-
->Cell Ranger v2 only uses step (1).
-
-After cell selection `Cell Ranger` aligns reads using `STAR`.
-It counts the number of reads per gene and provides summary statistics.
+We visualized our single-cell preps after filtration (35 μm).
+We do see some evidence of multiple small cells stuck together.
+Because we are using a filter we are biasing our chance of capturing large cell aggregates. 
+In particular, fused later staged primary spermatocytes are too large (~50 μm) to pass through the filter.
+Any single cell-type multiplet will be from the smaller somatic cells, spermatogonia, or early stage primary spermatocytes.
 
 
-10X Genomics suggested an expected capture rate of ~50% of cells loaded. 
-This table shows our expectations as well as the number of reads sequenced for each replicate.
+To demultiplex and identify individual cells 10X Genomics provides their own software ([`cell ranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/algorithms/overview)).
+We tried `cell ranger` versions `v2` and `v3`.
+According to the 10X Genomics website, `v3` has improved calling low RNA content cells.
+Both versions begin by calculating a total unique molecular index (UMI) cutoff based on distributional assumptions.
+This step is good at identifying cells with high RNA content.
+It performs poorly when multiple cell-types are present with a high degree of RNA content heterogeneity. 
+Our data contains a wide range of cell-types from high RNA-content primary spermatocytes to essentially quiescent stem cell populations.
+Version 3 of the software adds an additional step of comparing the remaining putative "empty" cells to each other.
+Based on this comparison they can separate low RNA content cells from empty GEMS.
+
+After cell selection `cell ranger` aligns reads using `STAR` and provides the gene count matrix for downstream analysis.
+It also provides summary statistics shown below.
+According to 10X Genomics' website, they expect a capture rate of ~50% of loaded cells.
+**Table 1** shows our expectations as well as the number of reads sequenced for each replicate.
 
 **Table 1. Expectations for cell capture and read counts.**
 
-| Rep | Approx Num Cells Loaded | Expected Num Cells Captured | Num of Reads |
-|-----|-------------------------|-----------------------------|--------------|
-| Testis 1 | 6,000 | 3,000 | 119,932,060 |
-| Testis 2 | 6,000 | 3,000 | 148,921,414 |
-| Testis 3 | 16,000 | 8,000 | 131,590,010 |
+| Rep      | Approx Num Cells Loaded | Expected Num Cells Captured | Num of Reads |
+|----------|-------------------------|-----------------------------|--------------|
+| Testis 1 | 6,000                   | 3,000                       | 119,932,060  |
+| Testis 2 | 6,000                   | 3,000                       | 148,921,414  |
+| Testis 3 | 16,000                  | 8,000                       | 131,590,010  |
 
----
+## Results 
 
-### 1. Cell Ranger (v2.1.1)
+### Cell Ranger
+
+Cell ranger summaries are displayed below (**click on tabs to view**). 
+
+#### V2 Defaults
+
+Cell ranger identified ~500 cells per replicate.
+This is less than 10% of loaded cells being recovered.
+Looking at the barcode rank plots we see that cells are called slightly past the first inflection point. 
+We can also see that ~50% of reads are found within a cell. 
+Cells that are captured have a high RNA content and large number of gene expressed (>4k).
+The extra depth in replicates 2 and 3 provided roughly double the median number of genes per cell, even though the number of reads per cell increased modestly.
+This would lead to an over all decrease in sparsity of the cell counts matrix.
+
+#### V2 Force
+
+Using the force option we can increase the number of cells per replicate to approach the theoretical 50% capture rate (**Table 1**).
+However, the added cells have a lower UMI and gene content.
+We still see an affect of increased depth with Replicates 2 and 3 having twice as many genes expressed per cell.
+Again the number of reads per cell was not affected by sequencing depth.
+Forcing also increased the fraction of reads found in a cell to ~60%.
+
+#### V3 Defaults
+
+The new version of cell ranger does call more cells than version 2 (defaults and force).
+By adding so many low UMI cells, the replicate differences in gene content have all but disappeared.
+While the fraction of reads per cell is still ~60%.
+While this method is less *ad hoc* than V2 force, results are not appreciably better.
+
+
+{{< tabs "summary stats" >}}
+
+{{< tab "Cell Ranger (v2.1.1; defaults)" >}}
+
+#### Testis Replicate 1
+{{<figure src="cellranger2_testis1_summary.png" width="100%">}}
+
+#### Testis Replicate 2
+{{<figure src="cellranger2_testis2_summary.png" width="100%">}}
+
+#### Testis Replicate 3
+{{<figure src="cellranger2_testis3_summary.png" width="100%">}}
+
 {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}}
+{{< /tab >}}
 
-When we started this project v2.1.1 was the most recent.
-We began by running with default parameters.
-While reading the documentation, I saw where 10X reported that v2 of their cell calling algorithm struggles when there is a high diversity of RNA content.
-In our data we expect a high diversity of RNA content because we are looking at stem cells, germ cells, and somatic cells.
-We ended up capturing ~500 cells per replicate (below).
-The barcode rank plots indicate a long sloped decrease (left to right) with a knee appearing around 100 UMI.
-Cells were only called at the high end of the plot suggesting that `Cell Ranger` was not calling cells with low RNA content.
-We think `Cell Ranger` is under calling cells (**Table 1**).
-10X Genomics website suggests the use of the `--force-cells` option to increase the number of cells that they call.
-Therefore, instead of using these cell calls we decided to try forcing the algorithm to call additional cells (next section).
+<!-- ---------------------------------------------------- -->
+
+{{< tab "Cell Ranger (v2.1.1; force)" >}}
 
 #### Testis Replicate 1
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis1_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger2_testis1_force_summary.png" width="100%">}}
 
 #### Testis Replicate 2
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis2_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger2_testis2_force_summary.png" width="100%">}}
 
 #### Testis Replicate 3
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger2_testis3_force_summary.png" width="100%">}}
 
----
-
-### 2. Cell Ranger Force (v2.1.1)
 {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
+{{< /tab >}}
 
-We ran `cell ranger --force-cells` using the expected number of cells captures (**Table 1**).
-Again looking at the barcode rank plots we see that cells were called all the way to the middle of the linear portion of the distribution (~ ≥1,000 UMI).
-Here the median total UMI per cell ranged from 1,091 -- 5,429, and the median number of genes per cell ranged from 546 -- 1,120.
-Replicates 2 and 3 had ~20 million more reads than replicate 1.
+<!-- ---------------------------------------------------- -->
+
+{{< tab "Cell Ranger (v3.0.1; defaults)" >}}
 
 #### Testis Replicate 1
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis1_force_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger3_testis1_summary.png" width="100%">}}
 
 #### Testis Replicate 2
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis2_force_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger3_testis2_summary.png" width="100%">}}
 
 #### Testis Replicate 3
-{{%expand "click to expand"%}}{{<figure src="cellranger2_testis3_force_summary.png" width="100%">}}{{% /expand%}}
+{{<figure src="cellranger3_testis3_summary.png" width="100%">}}
 
----
-
-### 3. Cell Ranger (v3.0.2)
 <!-- TODO: Change code link. -->
-{{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L123-L151" %}}Code{{% /button %}}
+{{% button href="" %}}Code{{% /button %}}
+{{< /tab >}}
 
-Recently 10X Genomics released v3 of their software.
-In this version they boast a better cell calling with low RNA content.
-Indeed, we see a higher number of cells captured compared to v2. 
-Replicate 1 had 174 fewer cells than using forced settings.
-This resulted in a slightly higher number of genes per cell.
-Conversely, replicate 2 and 3 added thousands of more cells.
-This caused a slight increase in the fraction of reads in a cell.
-Using the new software version seems less ad hoc than setting a `--force-cells` value.
+<!-- ---------------------------------------------------- -->
 
-#### Testis Replicate 1
-{{%expand "click to expand"%}}{{<figure src="cellranger3_testis1_summary.png" width="100%">}}{{% /expand%}}
+{{< /tabs >}}
 
-#### Testis Replicate 2
-{{%expand "click to expand"%}}{{<figure src="cellranger3_testis2_summary.png" width="100%">}}{{% /expand%}}
+### Clustering
 
-#### Testis Replicate 3
-{{%expand "click to expand"%}}{{<figure src="cellranger3_testis3_summary.png" width="100%">}}{{% /expand%}}
+By looking at the cell ranger summary statistics we can begin to get a feel for the data.
+However, it is hard to understand if the added cells are high quality and improve results. 
+The next step in the analysis is clustering cells and identifying cell types. 
+To get a better understanding of how cell selection affect clustering I ran one clustering method on each cell selection method.
+For more details on clustering see [Cell Clustering]({{< relref path="../clustering" >}}).
+
+{{< tabs "clustering" >}}
+
+{{< tab "Cell Ranger (v2.1.1; defaults)" >}}
+<!-- TODO: Update Section. -->
+
+
+{{% button href="" %}}Code{{% /button %}}
+{{< /tab >}}
+
+<!-- ---------------------------------------------------- -->
+
+{{< tab "Cell Ranger (v2.1.1; force)" >}}
+<!-- TODO: Update Section. -->
+
+
+{{% button href="" %}}Code{{% /button %}}
+{{< /tab >}}
+
+<!-- ---------------------------------------------------- -->
+
+{{< tab "Cell Ranger (v3.0.1; defaults)" >}}
+<!-- TODO: Update Section. -->
+
+
+{{% button href="" %}}Code{{% /button %}}
+{{< /tab >}}
+
+<!-- ---------------------------------------------------- -->
+
+{{< /tabs >}}
+
+
+## Conclusion
