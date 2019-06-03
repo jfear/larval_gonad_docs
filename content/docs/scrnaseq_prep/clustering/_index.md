@@ -5,7 +5,7 @@ weight: 10
 # bookShowToC: true
 ---
 
-# {{< param title >}}
+# Cell Clustering
 Cell clustering is the next step after demultiplexing and alignment.
 There are a number of tools created for scRNA-Seq analysis.
 The two most popular tools are [`Seurat`](https://satijalab.org/seurat/) and [`Monocle`](http://cole-trapnell-lab.github.io/monocle-release/).
@@ -37,10 +37,10 @@ I then identified variable genes in each replicate using [`Seurat::FindVariableG
 
 | Replicate | Number Variable Genes |
 |-----------|-----------------------|
-| 1 | 576 |
-| 2 | 494 |
-| 3 | 330 |
-| 1 ∩ 2 ∩ 3 | 108 |
+| 1         | 576                   |
+| 2         | 494                   |
+| 3         | 330                   |
+| 1 ∩ 2 ∩ 3 | 108                   |
 
 Next I ran CCA using the 108 common variable genes.
 Using 25 CCA dimensions I aligned the three replicates. 
