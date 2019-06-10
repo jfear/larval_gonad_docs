@@ -10,13 +10,21 @@ weight: 1
 
 **Problem:** Identify individual cells from scRNA-Seq data.
 
-Cell selection is variable with different parameters and versions.
+Cell selection is chalenging due to large differences in RNA content among cell types and the presence of ambient RNA giving signal to empty 10X beads.
+10X Genomics provides their own software for calling cells (`cell ranger`), however results are very different between versions and parameters.
+Here I look at 3 different runs of `cell ranger`.
 Cell ranger v2 with default parameters under performs returning ~500 cells per replicate.
 Cell ranger v2 with the `--force-cells` option forces the returning of the expected number of cells for each replicate, but this is rather *ad hoc*.
 Cell ranger v3 with default options returns the expected number of cells or more. 
-This seems less *ad hoc* than using the `--force-cells` option, but maybe over calling the number of cells especially in replicates 2 and 3.
-Also the addition of low count cells seems to muddle cluster calling in downstream analysis. 
-While similar clusters are identified, irrespective of this step, clusters called from cell ranger v2 `--force-cells` have better separation and representation of known markers from the literature.
+Cell ranger v3 seems less *ad hoc*, but maybe over calling the number of cells especially in replicates 2 and 3.
+I also used a popular third party method from the `dropletUtils` package, which appears to over call cell.
+
+Without having ground truth it is difficult to know which method performs the best.
+In the end, consistency is more importatnt than accuracy. 
+If empty 10X beads are included in the experimental data then they will likely cluster together and would not show any markers of interest. 
+The most conservative approach would be use the consensus. 
+However, because all of these methods are based on total UMI, the consensus would always just be the lowest number of cells called (i.e., `cell ranger` v2 with defaults). 
+Instead I propose using the intersection of (`cell ranger` v2 `--force-cells`, `cell ranger` v3, and `dropletUtil`), which would be conservative while still capturing the low RNA content cells.
 
 ## Overview
 
@@ -94,6 +102,12 @@ By adding so many low UMI cells, the replicate differences in gene content have 
 While the fraction of reads per cell is still ~60%.
 While this method is less *ad hoc* than V2 force, results are not appreciably better.
 
+#### DropletUtils
+>Lun ATL, Riesenfeld S, Andrews T, Dao T, Gomes T, participants in the 1st Human Cell Atlas Jamboree, Marioni JC (2019). “EmptyDrops: distinguishing cells from empty droplets in droplet-based single-cell RNA sequencing data.” Genome Biol., 20, 63. doi: 10.1186/s13059-019-1662-y.
+
+The third-party packages `dropletUtils` has a function to call empty cells `emptyDrops`.
+This function takes the raw counts table and models each cell against the ambient background.
+The majority of cells should be empty, so `dropletUtils` is identifying non-empty cells that devaite from this background population.
 
 {{< tabs "summary stats" >}}
 
@@ -139,6 +153,23 @@ While this method is less *ad hoc* than V2 force, results are not appreciably be
 
 #### Testis Replicate 3
 {{<figure src="cellranger3_testis3_summary.png" width="100%">}}
+
+<!-- TODO: Change code link. -->
+{{% button href="" %}}Code{{% /button %}}
+{{< /tab >}}
+
+<!-- ---------------------------------------------------- -->
+
+{{< tab "DropletUtils (emptyDrops)" >}}
+
+#### Testis Replicate 1
+{{<figure src="dropletutils_testis1_bc_rank.png" width="100%">}}
+
+#### Testis Replicate 2
+{{<figure src="dropletutils_testis2_bc_rank.png" width="100%">}}
+
+#### Testis Replicate 3
+{{<figure src="dropletutils_testis3_bc_rank.png" width="100%">}}
 
 <!-- TODO: Change code link. -->
 {{% button href="" %}}Code{{% /button %}}
