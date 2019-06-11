@@ -5,6 +5,8 @@ weight: 10
 # bookShowToC: true
 ---
 
+<span style="font-size: 3em; font-weight: 'strong'; color: #ff0000;">WORK IN PROGRESS DO NOT READ</span>
+
 # Cell Clustering
 Cell clustering is the next step after demultiplexing and alignment.
 There are a number of tools created for scRNA-Seq analysis.
