@@ -23,18 +23,17 @@ A consensus method is likely to be the most conservative solution.
 I will exclude Cell ranger v2 default parameter from the consensus because the consensus will always equal cell ranger v2 with defaults calls because we are taking the intersection.
 The 3-way consensus gives the following cell number per sample:
 
-* Testis Replicate 1: 2,717
-* Testis Replicate 2: 2,936
-* Testis Replicate 3: 7,245
-* Testis Replicate 4: 3,000 
-<span style="font-size: .8em; color: #ff0000">@Sharvani, how many cells were loaded in replicate 4? I may be using the wrong force setting.</span>
+* Testis Replicate 1: 2,790
+* Testis Replicate 2: 4,801
+* Testis Replicate 3: 12,515
+* Testis Replicate 4: 15,033
 
 I also ran a doublet detection software and found a modest amount of doublets that should be removed before clustering:
 
-* Testis Replicate 1: 48
-* Testis Replicate 2: 45
-* Testis Replicate 3: 169
-* Testis Replicate 4: 60 
+* Testis Replicate 1: 49
+* Testis Replicate 2: 46
+* Testis Replicate 3: 170
+* Testis Replicate 4: 61
 
 **I propose to move forward using these cell calls and removing doublets for the next step.**
 
@@ -70,8 +69,8 @@ According to 10X Genomics' website, they expect a capture rate of ~50% of loaded
 | Testis 1 | 6,000                   | 3,000                       | 119,932,060  |
 | Testis 2 | 6,000                   | 3,000                       | 148,921,414  |
 | Testis 3 | 16,000                  | 8,000                       | 131,590,010  |
-| Testis 4 | 6,000                   | 3,000                       | 148,921,414  |
-
+| Testis 4 | 16,000                  | 8,000                       | ???????????  |
+<!-- TODO Need to update testis4 number of reads. -->
 
 The identification of GEMs with 2 or more cells can also be challenging.
 There are two types of multiplets that can occur: 
@@ -397,17 +396,17 @@ I think `cell ranger` v2 with default parameters under calls cells and `dropletU
 Using `cell ranger` v2 with `--force-cells` and `cell ranger` v3 gives very similar results. 
 Using a 3-way consensus (`cellranger-force-wf`, `cellranger3-wf`, `droputils`) we get the following cell calls.
 
-* Testis Replicate 1: 2,717
-* Testis Replicate 2: 2,936
-* Testis Replicate 3: 7,245
-* Testis Replicate 4: 3,000 
+* Testis Replicate 1: 2,790
+* Testis Replicate 2: 4,801
+* Testis Replicate 3: 12,515
+* Testis Replicate 4: 15,033
 
 ### Doublet Detection
 
 I used one program for doublet detection `scrublet`, but it is only able to identify heterotypic doublets.
 There is evidence of heterotypic doublets, but the total number is relatively small.
 
-* Testis Replicate 1: 48
-* Testis Replicate 2: 45
-* Testis Replicate 3: 169
-* Testis Replicate 4: 60 
+* Testis Replicate 1: 49
+* Testis Replicate 2: 46
+* Testis Replicate 3: 160
+* Testis Replicate 4: 61
