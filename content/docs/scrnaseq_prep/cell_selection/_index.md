@@ -69,8 +69,7 @@ According to 10X Genomics' website, they expect a capture rate of ~50% of loaded
 | Testis 1 | 6,000                   | 3,000                       | 119,932,060  |
 | Testis 2 | 6,000                   | 3,000                       | 148,921,414  |
 | Testis 3 | 16,000                  | 8,000                       | 131,590,010  |
-| Testis 4 | 16,000                  | 8,000                       | ???????????  |
-<!-- TODO Need to update testis4 number of reads. -->
+| Testis 4 | 16,000                  | 8,000                       | 159,678,110  |
 
 The identification of GEMs with 2 or more cells can also be challenging.
 There are two types of multiplets that can occur: 
