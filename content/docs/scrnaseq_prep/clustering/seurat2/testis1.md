@@ -12,20 +12,7 @@ output:
 
 Here I explore clustering using Seurat v2 for clustering.
 
-
-
-
-
-
-
-
-
-
-
 ### Normalize Data
-
-
-
 
 ```r
 sobj <- FindVariableGenes(
@@ -39,7 +26,7 @@ sobj <- FindVariableGenes(
 )
 ```
 
-![](testis1_figures/find_variable_genes-1.png)<!-- -->
+{{<figure src="../testis1_figures/find_variable_genes-1.png">}}
 
 ### Scale Data
 
@@ -58,17 +45,17 @@ sobj <- ScaleData(
 
 #### Dimensional Gene Loadings
 
-![](testis1_figures/dotplot_pcs-1.png)<!-- -->
+{{<figure src="../testis1_figures/dotplot_pcs-1.png" width="100%" >}}
 
 #### Top Genes Heatmap
 
-![](testis1_figures/heatmap_pca-1.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_pca-1.png" width="100%" >}}
 
 #### JackStraw
 
 
 
-![](testis1_figures/jackstraw_pca-1.png)<!-- -->
+{{<figure src="../testis1_figures/jackstraw_pca-1.png" width="100%" >}}
 
 ```
 ## An object of class seurat in project testis1 
@@ -77,7 +64,7 @@ sobj <- ScaleData(
 
 #### Elbow Plot
 
-![](testis1_figures/elbow_pca-1.png)<!-- -->
+{{<figure src="../testis1_figures/elbow_pca-1.png" width="100%" >}}
 
 #### Dimension Selection
 
@@ -97,9 +84,9 @@ sobj <- ScaleData(
 ## [1] "res.1.2:  15"
 ```
 
-![](testis1_figures/umap-1.png)<!-- -->
+{{<figure src="../testis1_figures/umap-1.png" width="100%" >}}
 
-![](testis1_figures/tsne-1.png)<!-- -->
+{{<figure src="../testis1_figures/tsne-1.png" width="100%" >}}
 
 ### Look at marker genes
 
@@ -107,60 +94,92 @@ sobj <- ScaleData(
 
 #### Spermatogonia
 
-![](testis1_figures/heatmap_gonia-1.png)<!-- -->![](testis1_figures/heatmap_gonia-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_gonia-1.png" width="100%" >}}
+
+{{<figure src="../testis1_figures/heatmap_gonia-2.png" width="100%" >}}
 
 #### Spermatocytes
 
-![](testis1_figures/heatmap_spermatocytes-1.png)<!-- -->![](testis1_figures/heatmap_spermatocytes-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_spermatocytes-1.png" width="100%" >}}
+
+{{<figure src="../testis1_figures/heatmap_spermatocytes-2.png" width="100%" >}}
 
 #### CySC
 
-![](testis1_figures/heatmap_cysc-1.png)<!-- -->![](testis1_figures/heatmap_cysc-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_cysc-1.png" width="100%" >}}
+
+{{<figure src="../testis1_figures/heatmap_cysc-2.png" width="100%" >}}
 
 #### TE
 
-![](testis1_figures/heatmap_te-1.png)<!-- -->![](testis1_figures/heatmap_te-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_te-1.png" width="100%" >}}
+{{<figure src="../testis1_figures/heatmap_te-2.png" width="100%" >}}
 
 #### PC
 
-![](testis1_figures/heatmap_pc-1.png)<!-- -->![](testis1_figures/heatmap_pc-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_pc-1.png" width="100%" >}}
+{{<figure src="../testis1_figures/heatmap_pc-2.png" width="100%" >}}
 
 #### hub
 
-![](testis1_figures/heatmap_hub-1.png)<!-- -->![](testis1_figures/heatmap_hub-2.png)<!-- -->
+{{<figure src="../testis1_figures/heatmap_hub-1.png" width="100%" >}}
+{{<figure src="../testis1_figures/heatmap_hub-2.png" width="100%" >}}
 
 ### Cluster Markers
 
-
-
-
-```
-## # A tibble: 13 x 2
-##    cluster num_markers_per_cluster
-##    <fct>                     <int>
-##  1 0                           245
-##  2 1                           218
-##  3 2                          1174
-##  4 3                            19
-##  5 4                           485
-##  6 5                           362
-##  7 6                           110
-##  8 7                          1008
-##  9 8                           930
-## 10 9                           966
-## 11 10                          570
-## 12 11                         1707
-## 13 12                          702
-```
+| cluster | Number Markers Per Cluster |
+|---------|----------------------------|
+| 0       | 245                        |
+| 1       | 218                        |
+| 2       | 1174                       |
+| 3       | 19                         |
+| 4       | 485                        |
+| 5       | 362                        |
+| 6       | 110                        |
+| 7       | 1008                       |
+| 8       | 930                        |
+| 9       | 966                        |
+| 10      | 570                        |
+| 11      | 1707                       |
+| 12      | 702                        |
 
 #### Top 12 Genes Per Cluster
 
+##### Cluster 0
+{{<figure src="../testis1_figures/plot_top_markers-1.png" width="100%" >}}
 
+##### Cluster 1
+{{<figure src="../testis1_figures/plot_top_markers-2.png" width="100%" >}}
 
-![](testis1_figures/plot_top_markers-1.png)<!-- -->![](testis1_figures/plot_top_markers-2.png)<!-- -->![](testis1_figures/plot_top_markers-3.png)<!-- -->![](testis1_figures/plot_top_markers-4.png)<!-- -->![](testis1_figures/plot_top_markers-5.png)<!-- -->![](testis1_figures/plot_top_markers-6.png)<!-- -->![](testis1_figures/plot_top_markers-7.png)<!-- -->![](testis1_figures/plot_top_markers-8.png)<!-- -->![](testis1_figures/plot_top_markers-9.png)<!-- -->![](testis1_figures/plot_top_markers-10.png)<!-- -->![](testis1_figures/plot_top_markers-11.png)<!-- -->![](testis1_figures/plot_top_markers-12.png)<!-- -->![](testis1_figures/plot_top_markers-13.png)<!-- -->
+##### Cluster 2
+{{<figure src="../testis1_figures/plot_top_markers-3.png" width="100%" >}}
 
+##### Cluster 3
+{{<figure src="../testis1_figures/plot_top_markers-4.png" width="100%" >}}
 
+##### Cluster 4
+{{<figure src="../testis1_figures/plot_top_markers-5.png" width="100%" >}}
 
+##### Cluster 5
+{{<figure src="../testis1_figures/plot_top_markers-6.png" width="100%" >}}
 
+##### Cluster 6
+{{<figure src="../testis1_figures/plot_top_markers-7.png" width="100%" >}}
 
+##### Cluster 7
+{{<figure src="../testis1_figures/plot_top_markers-8.png" width="100%" >}}
 
+##### Cluster 8
+{{<figure src="../testis1_figures/plot_top_markers-9.png" width="100%" >}}
+
+##### Cluster 9
+{{<figure src="../testis1_figures/plot_top_markers-10.png" width="100%" >}}
+
+##### Cluster 10
+{{<figure src="../testis1_figures/plot_top_markers-11.png" width="100%" >}}
+
+##### Cluster 11
+{{<figure src="../testis1_figures/plot_top_markers-12.png" width="100%" >}}
+
+##### Cluster 12
+{{<figure src="../testis1_figures/plot_top_markers-13.png" width="100%" >}}

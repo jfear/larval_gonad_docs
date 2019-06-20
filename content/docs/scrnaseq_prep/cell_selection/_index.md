@@ -381,6 +381,80 @@ This is not true for the other replicates.
 {{< /tabs >}}
 
 
+### Gene Level Filters
+
+Next I looked at gene level information to determine if there are additional cells that need to removed.
+We can remove cells based on low or high gene content, and mitochondrial or rRNA gene expression.
+
+{{< tabs "Gene Level Filters" >}}
+{{< tab "Testis 1" >}}
+
+#### Distribution of cells based on gene level counts
+
+{{<figure src="./testis1_vln.png" width="80%">}}
+
+#### Relationship of UMI vs other measures
+
+{{<figure src="./testis1_scatter.png" width="80%">}}
+
+#### Grid search summary
+
+{{<figure src="./testis1_heatmap_grid.svg" link="./testis1_heatmap_grid.svg" target="_blank" width="100%" caption="click image to enlarge">}}
+
+{{< /tab >}}
+
+{{< tab "Testis 2" >}}
+
+#### Distribution of cells based on gene level counts
+
+{{<figure src="./testis2_vln.png" width="80%">}}
+
+#### Relationship of UMI vs other measures
+
+{{<figure src="./testis2_scatter.png" width="80%">}}
+
+#### Grid search summary
+
+{{<figure src="./testis2_heatmap_grid.svg" link="./testis2_heatmap_grid.svg" target="_blank" width="100%" caption="click image to enlarge">}}
+
+{{< /tab >}}
+
+{{< tab "Testis 3" >}}
+
+#### Distribution of cells based on gene level counts
+
+{{<figure src="./testis3_vln.png" width="80%">}}
+
+#### Relationship of UMI vs other measures
+
+{{<figure src="./testis3_scatter.png" width="80%">}}
+
+#### Grid search summary
+
+{{<figure src="./testis3_heatmap_grid.svg" link="./testis3_heatmap_grid.svg" target="_blank" width="100%" caption="click image to enlarge">}}
+
+{{< /tab >}}
+
+{{< tab "Testis 4" >}}
+
+#### Distribution of cells based on gene level counts
+
+{{<figure src="./testis4_vln.png" width="80%">}}
+
+#### Relationship of UMI vs other measures
+
+{{<figure src="./testis4_scatter.png" width="80%">}}
+
+#### Grid search summary
+
+{{<figure src="./testis4_heatmap_grid.svg" link="./testis4_heatmap_grid.svg" target="_blank" width="100%" caption="click image to enlarge">}}
+
+{{< /tab >}}
+
+
+{{< /tabs >}}
+
+
 ## Conclusions
 
 ### Data Quality
