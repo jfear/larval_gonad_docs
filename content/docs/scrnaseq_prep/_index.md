@@ -13,11 +13,12 @@ In this project we generated RNA sequencing libraries (RNA-Seq) from single cell
 
 We used 10X Genomics to generate biological triplicates of scRNA-seq.
 
-| Sample Name | Description                         |
-|-------------|-------------------------------------|
-| scTestis 1  | Testis replicate 1 (n = XXX testes) |
-| scTestis 2  | Testis replicate 2 (n = XXX testes) |
-| scTestis 3  | Testis replicate 3 (n = XXX testes) |
+| Sample Name | Description                        |
+|-------------|------------------------------------|
+| scTestis 1  | Testis replicate 1 (n = 22 testes) |
+| scTestis 2  | Testis replicate 2 (n = 55 testes) |
+| scTestis 3  | Testis replicate 3 (n = 50 testes) |
+| scTestis 4  | Testis replicate 4 (n = 50 testes) |
 
 <!-- TODO: Update counts -->
 <span style="color: #ff0000;">@Sharvani I need to update these counts</span>
@@ -31,6 +32,7 @@ We used the stranded Illumina sequencing protocol to generate biological quadrup
 | bTestis 1   | Testis replicate 1 (n = XXX testes) |
 | bTestis 2   | Testis replicate 2 (n = XXX testes) |
 | bTestis 3   | Testis replicate 3 (n = XXX testes) |
+| bTestis 4   | Testis replicate 4 (n = XXX testes) |
 
 <!-- TODO: Update counts -->
 <span style="color: #ff0000;">@Sharvani I need to update these counts</span>
