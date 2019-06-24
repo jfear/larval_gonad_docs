@@ -11,9 +11,11 @@ weight: 1
 
 **Problem:** Identify individual cells from scRNA-Seq data.
 
-The first step in scRNA-Seq analysis is to identify reads from individual cells.
+The first step in scRNA-Seq analysis is to identify which reads come from individual cells.
 This requires removing empty GEMs (**Figure 1**), heterotypic and homotypic multiplets, and cells with low expression diversity.
-Using these methods described I selected putative cells for clustering and downstream analysis (**Table 1**).
+I selected the following as putative cells for clustering and downstream analysis (**Table 1**).
+Replicates 3 and 4 are puzzling, with having more captured cells than expected.
+Either I am over-calling cells or more cells were loaded than thought.
 
 **Table 1. Final cell selection counts.**
 
@@ -27,69 +29,104 @@ Using these methods described I selected putative cells for clustering and downs
 ### Overview
 
 {{<figure src="https://cdn.technologynetworks.com/tn/images/thumbs/webp/640_360/10x-genomics-extends-their-application-portfolio-305346.webp?v=9720678"
-caption="**Figure 1. The 10X Library Preparation consists of mixing individual cells with individual gel beads (GEM).**" width="80%">}}
+caption="**Figure 1. The 10X Library Preparation consists of mixing cells with gel beads (GEMs).** The goal of this process is to get a single cell associated with a single GEM." width="80%">}}
 
-10X genomics is a droplet based method where cells are mixed with gel beads that contain indices and all materials needed for the first strand cDNA synthesis (**Figure 1**).
-The 10X genomics kit that we are using has 737,280 GEMs for each sample.
-Each GEM is coated with oligonucleotides that contain two indices:
-The first index is unique for each GEM and allows for demultiplexing of cells.
-The second index is unique for each captured mRNA molecule and allows for counting unique molecules (UMI) instead of reads.
+10X genomics is a droplet based method where cells are mixed with gel beads (GEMs) that contain indices and all materials needed for the first strand cDNA synthesis (**Figure 1**).
 Cells are loaded with GEMs using a Poisson distribution which results in most GEMs being empty.
-The first processing step is to identify which GEMs contain an individual cell.
-This be broken down into two steps: remove empty GEMs and remove GEMs with two or more cells.
+The 10X genomics kit that we are using has 737,280 GEMs per sample.
+Oligonucleotides attached to each GEM contain a cell index and a molecule index.
+I want to only use GEMs capturing a single cell, so I need to remove empty GEMs and GEMs that captured more than 1 cell.
 
-To identify empty GEMs we need to compare the RNA content among GEMs and identify a threshold that separate empty GEMs.
-This is complicated by the fact that there is ambient RNA in the buffer that gives empty GEMs a signal that can be similar to a low RNA content cell.
-10X Genomics provides their own software for calling cells ([`cell ranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/algorithms/overview)), however results vary between versions and parameters.
-According to the 10X Genomics website, `v3` has improved calling of low RNA content cells.
-Both versions identify cells with high RNA content by calculating a total unique molecular index (UMI) cutoff based on distributional assumptions.
-Version 3 of the software adds an additional step of comparing the remaining putative "empty" GEMs to each other.
-Based on this comparison they can separate low RNA content cells from empty GEMs.
+We can model total unique molecule expression (UMI) to separate GEMs that contain ≥1 cell from empty GEMs.
+This will account for any ambient RNA in the media.
+10X Genomics provides their own software for calling cells ([`cell ranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/algorithms/overview)).
+Recently, 10X genomics released version 3 of `cell ranger`, which boasts improved cell calling for low RNA content cells.
+Here I evaluate `cell ranger` `v2` and `v3` as well as a 3rd party tool `DropLetUtils`.
 
-According to 10X Genomics' website, they expect a capture rate of ~50% of loaded cells.
-**Table 1** shows our expectations as well as the number of reads we sequenced for each replicate.
-
-The identification of GEMs with 2 or more cells can also be challenging.
+In addition to removing GEMs with 0 cells, we also want to remove GEMs with ≥2 cells (a.k.a multiplets).
 There are two types of multiplets that can occur:
 
-* Homeotypic: 2 or more cells from the same cell type
-* Heterotypic: 2 or more cells from different cell types.
+* Heterotypic: ≥2 cells from different cell types.
+* Homeotypic: ≥2 cells from the same cell type
 
-Homeotypic multiplets are is impossible to identify bioinformatically.
-Some methods set a high end UMI threshold to remove putative homeotypic multiplets, but I am hesitant to do this in our data because our cell types have an expected large dynamic range of RNA content.
-In contrast, heterotypic multiplets can be identified by modeling *in silico* doublets by mixing two or more cells from different cell type clusters.
+Heterotypic multiplets can be identified *in silico*.
+Essentially I create synthetic doublets by mixing two or more cells from different cell type clusters.
+I then re-cluster cells + synthetic cells.
+Cells that cluster with synthetic doublets are likely to be heterotypic multiplets and are removed. 
+There are several tools available to do this analysis, I decided to use `scrublet` because it works with raw 10X data.
 
-Sharvani visualized single-cell preps after filtration (35 μm), and she dose see evidence of multiple small cells stuck together.
-Because we are using a filter we are biasing our chance of capturing large cell aggregates.
+We do expect biases when it comes to the types of multiplets that we capture. 
+We do not expect to capture doublets of large cells or large aggregates because there is a filtration step (35 μm) during sample prep.
 In particular, fused later staged primary spermatocytes are too large (~50 μm) to pass through the filter.
-While multiplets from smaller somatic cells, spermatogonia, or early stage primary spermatocytes may pass through the filter.
-Sharvani is working on getting an estimate of the frequency of multiplets after filtration.
+While multiplets from smaller somatic cells, spermatogonia, or early stage primary spermatocytes may easily pass through the filter.
+Sharvani does see evidence for multiple small cells stuck together after filtration.
+She is working on getting an estimate of the frequency of multiplets to give better insight of how big of a problem this may be.
 
 ### Results
 
-#### Empty Cell Identification
+**NOTE:** Below I display results for each replicate on different tabs. 
+Click the replicate name to view results. 
+Complete descriptions of the data are included with **Testis 1**.
 
-I display results for each replicate in the tabs below.
-I have full descriptions of each section on the **Testis 1** tab.
+#### Empty GEM Identification
+
+To identify empty GEMs I used multiple software and parameterizations.
+
+**`cellranger-wf`** uses cell ranger v2 with default settings. 
+This workflow calls the fewest number of cells (~500 cells / rep).
+According to 10X Genomics we expect to capture ~50% of loaded cells, but this method gives ≤8%.
+This method is known not to perform well when there is a large dynamic range of RNA content.
+Our samples are from the *Drosophila* testis which is known to contain nearly quiescent cells and extremely high RNA content cells.
+Therefore, we think this method is under calling captured cells.
+
+**`cellranger-force-wf`** uses cell ranger v2 with the `--force-cells` option.
+When samples contain a high dynamic range of RNA content, 10X Genomics suggests to use the `--force-cells`.
+Essentially this method orders cells according to total UMI content and then keeps the highest `N` cells. 
+We specified our forced settings to capture 50% of loaded cells, but this is *ad hoc* and likely over calls captured cells. 
+
+**`cellranger3-wf`** uses cell ranger v3 with default settings.
+Recently, 10X Genomics released version 3 of cell ranger. 
+This version adds an additional step to the cell calling algorithm which improves calling of low RNA content cells.
+Interestingly, this method called more cells than `cellranger-force-wf` in all replicates expect **Testis 1**. 
+
+**`droputils`** uses DropLetUtils v3.0.1 with default settings.
+DropLetUtils is an R packaged with several algorithms for scRNA-Seq.
+I used the `emptydrops` function which models UMI to classify empty GEMs.
+This method performs very different for each replicate. 
+This method seems to over call cells in **Testis 1**, **Testis 3**, and **Testis 4** while performing similarly to `cell ranger` on **Testis 2**.
+
+Without a ground truth data set it is impossible to know which method is best approximating real cell calls.
+Consensus is often used in the absence of truth. 
+However, sense all of these methods use total UMI in their models, the 4-way consensus would be the same as the most conservative cell calls (`cellranger-wf`).
+Given the known limitation of `cellranger-wf` and the *ad hoc* nature of `cellranger-force-wf` I decided to use the consensus of `cellranger3-wf` and `droputils`. 
+
+
+**Table 2. Cell count after removing empty GEMs.**
+
+| Replicate | `cellranger-wf` | `cellranger-force-wf` | `cellranger3-wf` | `droputils` | 2-way Consensus<sup>‡</sup> |
+|-----------|-----------------|-----------------------|------------------|-------------|-----------------------------|
+| Testis 1  | 483             | 3,000                 | 2,826            | 13,884      | 2,790                       |
+| Testis 2  | 550             | 3,000                 | 6,385            | 5,765       | 4,801                       |
+| Testis 3  | 423             | 8,000                 | 12,485           | 39,872      | 12,515                      |
+| Testis 4  | 349             | 8,000                 | 15,033           | 34,761      | 15,033                      |
+
+<sup>‡</sup>Intersection of `cellranger3-wf` and `droputils`.
+
 
 {{< tabs "Cell Selection By Sample" >}}
 {{< tab "Testis 1" >}}
 
-##### `cellranger-wf` (Cell Ranger v2.1.1; defaults)
-
-When we started this project `cell ranger` v2.1.1 was available.
-This section shows results from running this program with default parameters.
+##### `cellranger-wf` (v2.1.1; defaults)
 
 {{<figure src="cellranger2_testis1_summary.png" width="100%">}}
 
-This is the summary figure provided by `cell ranger`.
-In it we see various summary statistics along with the Barcode Rank plot.
+Summary statistics and barcode rank plot provided by `cell ranger`.
 Things to pay attention to:
 
-* The three measure in green at the top (*Estimated Number of Cells*, *Mean Reads per Cell*, and *Median Genes per Cell*).
+* The three numbers in green at the top (*Estimated Number of Cells*, *Mean Reads per Cell*, and *Median Genes per Cell*).
 We are looking for a balance between these numbers.
-In general, cells are added following the distribution in the barcode rank plot.
-In other words, cells with fewer reads are added as we increase the *Estimated Number of Cells*.
+As cells with lower UMI are added, the *Mean Reads per Cell* and *Median Genes per Cell* will decrease.
+We do not want these numbers to get too low as the added cells will not have enough signal.
 
 * The *Fraction of Reads in Cells* (2nd number below plot).
 We expect that most reads should be in a cell and not in empty GEMs.
@@ -97,31 +134,22 @@ We expect that most reads should be in a cell and not in empty GEMs.
 * The percent of *Reads Mapped to Genome*.
 This number will be the same across cell ranger runs, but indicates how good our samples are.
 **Testis 1** has the lowest mapping rate of 73%.
-This is considered moderate to low quality in Bulk RNA-Seq studies where we typically aim for >90% mapping.
+This is considered moderate to low quality in Bulk RNA-Seq studies where we typically aim for ≥90% mapping.
 
 * The Barcode Rank Plot.
 This plot shows the Log Total UMI Count (Y-axis) vs the Log Rank Ordered Cell Count (X-axis).
 Light gray points are empty GEMs and colored points are considered non-empty cells.
 The goal of cell selection is to find the cutoff along this curve.
 
-##### `cellranger-force-wf` (Cell Ranger v2.1.1; force)
+##### `cellranger-force-wf` (v2.1.1; force)
 
-I was surprised that `cell ranger` with defaults was only giving ~500 cells per sample.
-The 10X website points out that the v2 algorithm does not perform well on cell types with a high dynamic range and cell types with low RNA content.
-They suggested using the `--force-cells` option which allows you to set how many cells you get back.
-10X also suggested that the expected capture rate is ~50% of the number of loaded cells.
-I used this estimate (**Table 1**) to re-run `cell ranger` with the forced setting.
-This gives us many more reads than the defaults, but at the cost of *Median Genes per Cell*.
-However, the *Fraction Reads in Cells* is much closer to the >70% suggested by 10X.
+Note the *Fraction Reads in Cells* is closer to the >70%.
 
 {{<figure src="cellranger2_testis1_force_summary.png" width="100%">}}
 
-##### `cellranger3-wf (Cell Ranger v3.0.1; defaults)
+##### `cellranger3-wf (v3.0.1; defaults)
 
-When asked to revisit these decision points, I looked back at the 10X website to find `cell ranger` v3 was released.
-Version 3 boasts an improved cell selection algorithm that handles low RNA content cells better than v2.
-This section has results from v3.0.1 using default settings.
-These results tend to be very close to v2 with the forced setting.
+These results are very similar to `cellranger-force-wf`.
 
 {{<figure src="cellranger3_testis1_summary.png" width="100%">}}
 
@@ -145,8 +173,7 @@ This method always calls way more cells than `cell ranger` methods.
 
 ##### Pairwise Similarity (Jaccard)
 
-In this section I look at the similarity of calls between the different methods.
-To do this I use the Jaccard index which compares to boolean arrays.
+In this section I look at the similarity of calls between the different methods using the pairwise Jacaard similarity score.
 The `cellranger-foce-wf` and the `cellranger3-wf` always have the highest similarity.
 The `droputils` and the `cellranger-wf` always have the lowest similarity.
 
@@ -159,9 +186,6 @@ The `droputils` and the `cellranger-wf` always have the lowest similarity.
 
 ##### Consensus
 
-As previously discussed, I think a consensus method is probably the conservative.
-In this section I summarize different ways of taking the consensus.
-I removed `cellranger-wf` from the consensus measure, because it will give the same results as just running `cellranger-wf`.
 I provide a summary for the 3-way consensus (`cellranger-force-wf`, `cellranger3-wf`, `droputils`) and the 2-way consensus (`cellranger3-wf` and `droputils`).
 
 * Number of cells with 3-way consensus:  2,717
@@ -171,28 +195,25 @@ I provide a summary for the 3-way consensus (`cellranger-force-wf`, `cellranger3
 
 {{<figure src="testis1_combined_upset.svg" width="100%">}}
 
-This is an UpSet plot.
-It is like a high dimensional Venn Diagram.
+This is an UpSet plot, it is like a high dimensional Venn Diagram.
 Each bar represents the number of cells for a given set.
 The set is represented below as black dots.
 For example the first bar is the 4-way consensus (intersection of all 4 methods).
-This plot clearly shows that `droputils` calls way more cells than other methods (here 11,094).
-Also that the 4-way consensus is equivalent to `cellranger-wf`.
 
 <!-- {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}} -->
 {{< /tab >}}
 
 {{< tab "Testis 2" >}}
 
-##### `cellranger-wf` (Cell Ranger v2.1.1; defaults)
+##### `cellranger-wf` (v2.1.1; defaults)
 
 {{<figure src="cellranger2_testis2_summary.png" width="100%">}}
 
-##### `cellranger-force-wf` (Cell Ranger v2.1.1; force)
+##### `cellranger-force-wf` (v2.1.1; force)
 
 {{<figure src="cellranger2_testis2_force_summary.png" width="100%">}}
 
-##### `cellranger3-wf` (Cell Ranger v3.0.1; defaults)
+##### `cellranger3-wf` (v3.0.1; defaults)
 
 {{<figure src="cellranger3_testis2_summary.png" width="100%">}}
 
@@ -218,20 +239,19 @@ Also that the 4-way consensus is equivalent to `cellranger-wf`.
 
 {{<figure src="testis2_combined_upset.svg" width="100%">}}
 
-<!-- {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}} -->
 {{< /tab >}}
 
 {{< tab "Testis 3" >}}
 
-##### `cellranger-wf` (Cell Ranger v2.1.1; defaults)
+##### `cellranger-wf` (v2.1.1; defaults)
 
 {{<figure src="cellranger2_testis3_summary.png" width="100%">}}
 
-##### `cellranger-force-wf` (Cell Ranger v2.1.1; force)
+##### `cellranger-force-wf` (v2.1.1; force)
 
 {{<figure src="cellranger2_testis3_force_summary.png" width="100%">}}
 
-##### `cellranger3-wf` (Cell Ranger v3.0.1; defaults)
+##### `cellranger3-wf` (v3.0.1; defaults)
 
 {{<figure src="cellranger3_testis3_summary.png" width="100%">}}
 
@@ -257,20 +277,20 @@ Also that the 4-way consensus is equivalent to `cellranger-wf`.
 
 {{<figure src="testis3_combined_upset.svg" width="100%">}}
 
-<!-- {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}} -->
 {{< /tab >}}
 
 {{< tab "Testis 4" >}}
 
-##### `cellranger-wf` (Cell Ranger v2.1.1; defaults)
+##### `cellranger-wf` (v2.1.1; defaults)
 
 {{<figure src="cellranger2_testis4_summary.png" width="100%">}}
 
-##### `cellranger-force-wf` (Cell Ranger v2.1.1; force)
+##### `cellranger-force-wf` (v2.1.1; force)
 
+<!-- TODO update running --force-cells 80000 -->
 {{<figure src="cellranger2_testis4_force_summary.png" width="100%">}}
 
-##### `cellranger3-wf` (Cell Ranger v3.0.1; defaults)
+##### `cellranger3-wf` (v3.0.1; defaults)
 
 {{<figure src="cellranger3_testis4_summary.png" width="100%">}}
 
@@ -287,6 +307,8 @@ Also that the 4-way consensus is equivalent to `cellranger-wf`.
 | cellranger3-wf      |          0.5776 |                0.6538 |           1      |      0.4325 |
 | droputils           |          0.01   |                0.0863 |           0.4325 |      1      |
 
+<!-- TODO update running --force-cells 80000 -->
+
 ##### Consensus
 
 * Number of cells with 3-way consensus:  3,000
@@ -294,50 +316,53 @@ Also that the 4-way consensus is equivalent to `cellranger-wf`.
 * Number of different calls between consensus with 3 vs 2 measures:  12,033
 * Jaccard similarity of consensus with 3 vs 2 measures:  0.6538361957366013
 
-{{<figure src="testis3_combined_upset.svg" width="100%">}}
+{{<figure src="testis4_combined_upset.svg" width="100%">}}
 
-<!-- {{% button href="https://github.com/jfear/larval_gonad/blob/5f8f4569ea253ab96d497055e7ae6ebb4c82a744/scrnaseq-wf/Snakefile#L96-L121" %}}Code{{% /button %}} -->
+<!-- TODO update running --force-cells 80000 -->
+
 {{< /tab >}}
 {{< /tabs >}}
 
-#### Doublet Detection
+#### Heterotypic Doublet Detection
 
-Next I wanted to identify cells that are potential heterotypic doublets.
+Next I wanted to identify cells that are heterotypic doublets.
 There are several software packages available, but all use essentially the same algorithm.
 
 1. Cells are clustered into individual cells types
 2. Cells from different clusters are combined *in silico* to form synthetic doublets.
 3. Cells + synthetic doublets are mixed and re-clustered.
-4. Cells that cluster with the synthetic doublets are thought to be heterotypic doublets.
+4. Cells that cluster with the synthetic doublets are likely heterotypic multiplets.
 
-I am not sure how well this works with cell lineages.
-For example, the transition from spermatogonia to spermatocyte will probably have an intermediate cell type that has both spermatogonia specific transcripts and spermatocyte specific transcripts.
-If this intermediate cell type exists it may be called as a heterotypic doublet.
-Also this method is dependent on how the clustering is done.
-Here I use sane parameter and do not do any kind of optimization.
 Again outputs are displayed below in different tabs for different samples.
 On the **Testis 1** I added additional text describing what results are provided.
 
-I included cells from the 3-way consensus above.
+I am using cells from the 2-way consensus above.
+
+**Table 3. Summary of homotypic multiplets.**
+
+| Replicate | Num Homotypic Multiplets |
+|-----------|--------------------------|
+| Testis 1  | 48                       |
+| Testis 2  | 45                       |
+| Testis 3  | 169                      |
+| Testis 4  | 60                       |
 
 {{< tabs "Doublet Detection By Sample" >}}
 {{< tab "Testis 1" >}}
 
 ##### Simulation Cutoff
 
-The tool I am using is called `scrublet`.
-It provides this diagnostic histogram to help identify the threshold for what is called a doublet.
+`scrublet` provides this diagnostic histogram to help identify the threshold for what is called a doublet.
 In the right panel are the simulated doublets.
-It is expected to be a biomodal distribution with doublets being on the right and singlets (or homeotypic doublets) being on the left.
-Our data does not proved a super clear modality, this is probably due to the fact we have two lineage and a large dynamic range of RNA content.
+It is expected to be a bimodal distribution with doublets being on the right and singlets (or homeotypic doublets) being on the left.
+Our data does not provide a clear modality, this is probably due to the fact we have two lineage and a large dynamic range of RNA content.
 I set the threshold (t = 0.25) to be the same for all replicates.
 
 {{<figure src="testis1_scrublet_histogram.png" width="100%">}}
 
 ##### Projects of Doublets (n = 48)
 
-This plot shows the UMAP projects of the cells with the doublet calls.
-UMAP is a manifold method similar to tSNE, but does a better job maintaining global structure.
+This plot shows the UMAP projection colored by doublet calls.
 In **Testis 1** we can see these intermediate cell types being labeled as doublets.
 This is not true for the other replicates.
 
@@ -382,10 +407,28 @@ This is not true for the other replicates.
 {{< /tab >}}
 {{< /tabs >}}
 
-#### Gene Level Filters
+#### Homotypic Doublet and Low Complexity Detection
 
-Next I looked at gene level information to determine if there are additional cells that need to removed.
-We can remove cells based on low or high gene content, and mitochondrial or rRNA gene expression.
+Finally, I attempt to remove homotypic cells using a high expression cutoff.
+At the same time I am checking if additional low expression cutoffs would be useful, and if I should remove cells with high mitochondrial or rRNA expression.
+In the absence of truth, setting these thresholds is *ad hoc*. 
+To get a better understanding of the value of these different criteria I use a grid search.
+For each criteria (low gene cutoff, high gene cutoff, percent mitochondiral reads, percent rRNA reads) I selected 4 levels.
+I ran Seurat (v2) clustering on the different combinations in these same (12 dimensions), aiming to get 12-13 clusters. 
+I used the Adjusted Rand Index to look at similarity of cluster calls for each pairwise comparison.
+
+In general, filtering by the percent mitochondrial or percent ribosomal had no affect on clustering. 
+Low end cutoffs of 200 or 500 expressed genes behaved very similarly, while increasing this to 1,000 gene changes clustering outcome.
+In **Testis 1** there was little difference using a high end cutoff. 
+However, in other samples any high cutoff created different clusters than using no high end cutoff.
+I am interpreting this as the most extreme high expressing cells can affect clustering. 
+
+##### Cutoff Criteria
+
+* **NO** Mitochondrial criteria
+* **NO** rRNA criteria
+* Remove cells **≤200 expressed genes**.
+* Remove cells **≥5,000 expressed genes**.
 
 {{< tabs "Gene Level Filters" >}}
 {{< tab "Testis 1" >}}
@@ -394,13 +437,26 @@ We can remove cells based on low or high gene content, and mitochondrial or rRNA
 
 {{<figure src="./testis1_vln.png" width="80%">}}
 
+Cell distributions for:
+
+* nGene: The total number genes expressed (>0). Cells at the high end of this distribution are possibly homotypic doublets.
+* nUMI: The total UMI count per cell. Cells at the high end of this distribution are possibly homotypic doublets.
+* percent.mito: The percent of reads mapping to the mitochondria. Cells at the high end of this distribution are possibly dying.
+* percent.ribo: The percent reads mapping to the rRNA. Cells at the high end of this distribution possibly had poor poly(A) selection.
+
 ##### Relationship of UMI vs other measures
 
 {{<figure src="./testis1_scatter.png" width="80%">}}
 
+As expeted the nGene and nUMI are highly correlated. 
+However, cells high in percent mitochondrial or ribosomal reads tend to be in the low to middle of the UMI distribution.
+
 ##### Grid search summary
 
 {{<figure src="./testis1_heatmap_grid.svg" link="./testis1_heatmap_grid.svg" target="_blank" width="100%" caption="click image to enlarge">}}
+
+The similarity matrix of [Adjusted Rand Indexes](https://scikit-learn.org/stable/modules/clustering.html#adjusted-rand-score). 
+A score of 1 indicates cluster calls were identical. 
 
 {{< /tab >}}
 
@@ -455,30 +511,10 @@ We can remove cells based on low or high gene content, and mitochondrial or rRNA
 
 ### Conclusions
 
-#### Data Quality
+In summary I applied the following approaches:
 
-The overall data quality is moderate to good.
-We map 73-92% of reads to the genome.
-I have not explicitly looked at rRNA content or other QC metics.
+* **Removed Empty GEMs:** Using a consensus approach with `cellranger3-wf` and `DropLetUtils`
+* **Removed heterotypic multiplets:** Using an *in silico* approach with `scrublet`.
+* **Removed homotypic multiplets and low complexity cells:** Using a sane cutoff of (200≤ Num Expressed Genes per Cell <5,000) that does not change clustering too compared to similar criteria.
 
-#### Cell Selection
-
-I employed 4 different methods for cell selection.
-I think `cell ranger` v2 with default parameters under calls cells and `dropletUtils` over calls cells.
-Using `cell ranger` v2 with `--force-cells` and `cell ranger` v3 gives very similar results.
-Using a 3-way consensus (`cellranger-force-wf`, `cellranger3-wf`, `droputils`) we get the following cell calls.
-
-* Testis Replicate 1: 2,790
-* Testis Replicate 2: 4,801
-* Testis Replicate 3: 12,515
-* Testis Replicate 4: 15,033
-
-#### Doublet Detection
-
-I used one program for doublet detection `scrublet`, but it is only able to identify heterotypic doublets.
-There is evidence of heterotypic doublets, but the total number is relatively small.
-
-* Testis Replicate 1: 49
-* Testis Replicate 2: 46
-* Testis Replicate 3: 160
-* Testis Replicate 4: 61
+For the final number of selected cells see **Table 1**.
