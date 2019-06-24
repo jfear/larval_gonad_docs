@@ -20,9 +20,6 @@ We used 10X Genomics to generate biological triplicates of scRNA-seq.
 | scTestis 3  | Testis replicate 3 (n = 50 testes) |
 | scTestis 4  | Testis replicate 4 (n = 50 testes) |
 
-<!-- TODO: Update counts -->
-<span style="color: #ff0000;">@Sharvani I need to update these counts</span>
-
 ## Bulk RNA-Seq
 
 We used the stranded Illumina sequencing protocol to generate biological quadruplicates of RNA-seq.
