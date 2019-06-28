@@ -2,10 +2,7 @@
 title: Integrated Clustering (n = 3)
 author: Justin Fear
 date: 'Compiled: June 24, 2019'
-output:
-    html_document:
-        self_contained: TRUE
-        keep_md: TRUE
+weight: 1
 ---
 
 ## Integrated Clustering (n = 3; Seurat v3)
