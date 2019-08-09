@@ -1,9 +1,9 @@
 ---
-title: "D. willistoni (Gonia vs Cytes)"
+title: "D. willistoni (SP vs Cytes)"
 weight: 5
 ---
 
-#### D. williostoni (Gonia vs Cytes)
+#### D. williostoni (SP vs Cytes)
 
 I performed differential expression analysis by comparing cells in the SP cluster with cells in EPS, PS1, PS2, and PS3.
 I then took the list of genes from this analysis (SP-biased, Cyte-biased, Not Significant) and filtered out the orthologs.
@@ -11,13 +11,13 @@ The majority of orthologs expressed in the germline were conserved with very few
 
 **Table 1. Number of genes per Muller Element.**
 
-| index            |   muller_A |   muller_D |   muller_E |
-|------------------|------------|------------|------------|
-| conserved        |         76 |        145 |        212 |
-| moved_on         |          0 |          0 |          0 |
-| gene_death       |         30 |         22 |         32 |
-| moved_off        |          2 |         16 |          6 |
-| other            |         30 |         33 |         26 |
+| index      | muller_A | muller_D | muller_E |
+|------------|----------|----------|----------|
+| conserved  | 76       | 145      | 212      |
+| moved_on   | 0        | 0        | 0        |
+| gene_death | 30       | 22       | 32       |
+| moved_off  | 2        | 16       | 6        |
+| other      | 30       | 33       | 26       |
 
 Using these conservation classes I wanted to see if there were differences in primary spermatocyte expression (EPS, PS1, PS2, PS3).
 We can look for enrichment in two ways: (1) we can look at the percent of primary spermatocyte cells expressing genes in each class,
@@ -71,18 +71,18 @@ Again there is evidence of a enrichment of genes that underwent "Selection Again
 
 **Table 2. Number of genes with differential expression on Muller A.**
 
-| bias   |   conserved |   moved_on |   gene_death |   moved_off |
-|--------|-------------|------------|--------------|-------------|
-| NS     |           0 |          0 |            6 |           0 |
-| cyte   |           1 |          0 |            9 |           1 |
-| gonia  |          75 |          0 |           15 |           1 |
+| bias | conserved | moved_on | gene_death | moved_off |
+|------|-----------|----------|------------|-----------|
+| NS   | 0         | 0        | 6          | 0         |
+| cyte | 1         | 0        | 9          | 1         |
+| SP   | 75        | 0        | 15         | 1         |
 
 **Table 3. Number of genes with selection on Muller A.**
 
-| bias        |   Selection Favor |   Selection Against |
-|-------------|-------------------|---------------------|
-| Cyte Biased |                 1 |                  10 |
-| Not Biased  |                75 |                  22 |
+| bias        | Selection Favor | Selection Against |
+|-------------|-----------------|-------------------|
+| Cyte Biased | 1               | 10                |
+| Not Biased  | 75              | 22                |
 
 Fisher's Exact Test: 1.4586005236732388e-05
 
@@ -91,18 +91,18 @@ Fisher's Exact Test: 1.4586005236732388e-05
 
 **Table 4. Number of genes with differential expression on Muller D.**
 
-| bias   |   conserved |   moved_on |   gene_death |   moved_off |
-|--------|-------------|------------|--------------|-------------|
-| NS     |          12 |          0 |            5 |           4 |
-| cyte   |          31 |          0 |           13 |           9 |
-| gonia  |         102 |          0 |            4 |           3 |
+| bias | conserved | moved_on | gene_death | moved_off |
+|------|-----------|----------|------------|-----------|
+| NS   | 12        | 0        | 5          | 4         |
+| cyte | 31        | 0        | 13         | 9         |
+| SP   | 102       | 0        | 4          | 3         |
 
 **Table 5. Number of genes with selection on Muller D.**
 
-| bias        |   Selection Favor |   Selection Against |
-|-------------|-------------------|---------------------|
-| Cyte Biased |                31 |                  22 |
-| Not Biased  |               114 |                  16 |
+| bias        | Selection Favor | Selection Against |
+|-------------|-----------------|-------------------|
+| Cyte Biased | 31              | 22                |
+| Not Biased  | 114             | 16                |
 
 Fisher's Exact Test: 3.1710112640960124e-05
 
@@ -111,18 +111,18 @@ Fisher's Exact Test: 3.1710112640960124e-05
 
 **Table 6. Number of genes with differential expression on Muller E.**
 
-| bias   |   conserved |   moved_on |   gene_death |   moved_off |
-|--------|-------------|------------|--------------|-------------|
-| NS     |          18 |          0 |            5 |           2 |
-| cyte   |          49 |          0 |           21 |           3 |
-| gonia  |         145 |          0 |            6 |           1 |
+| bias | conserved | moved_on | gene_death | moved_off |
+|------|-----------|----------|------------|-----------|
+| NS   | 18        | 0        | 5          | 2         |
+| cyte | 49        | 0        | 21         | 3         |
+| SP   | 145       | 0        | 6          | 1         |
 
 **Table 7. Number of genes with selection on Muller E.**
 
-| bias        |   Selection Favor |   Selection Against |
-|-------------|-------------------|---------------------|
-| Cyte Biased |                49 |                  24 |
-| Not Biased  |               163 |                  14 |
+| bias        | Selection Favor | Selection Against |
+|-------------|-----------------|-------------------|
+| Cyte Biased | 49              | 24                |
+| Not Biased  | 163             | 14                |
 
 Fisher's Exact Test: 2.706475148827376e-06
 

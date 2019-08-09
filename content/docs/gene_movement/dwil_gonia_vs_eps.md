@@ -1,9 +1,9 @@
 ---
-title: "D. willistoni (Gonia vs EPS)"
+title: "D. willistoni (SP vs EPS)"
 weight: 6
 ---
 
-#### D. williostoni (Gonia vs EPS)
+#### D. williostoni (SP vs EPS)
 
 I performed differential expression analysis by comparing cells in the SP cluster with cells in EPS.
 I then took the list of genes from this analysis (SP-biased, EPS-biased, Not Significant) and filtered out the orthologs.
