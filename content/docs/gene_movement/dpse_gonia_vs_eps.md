@@ -20,7 +20,7 @@ The number of genes analyzed per Muller element and class are in **Table 1**.
 | other            |         16 |         34 |         27 |
 
 
-### Primary Spermatocyte Expression
+### EPS Expression
 
 In **Figures 1-3** I look at the proportion of EPS cells that expressed genes in the different movement classes.
 The number of genes in the moved_on and moved_off classes are very low (< 10) which makes interpretation difficult.
