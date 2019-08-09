@@ -30,7 +30,7 @@ As a control, Muller E (2) would not show selection.
 In **Figures 1-3** I look at the proportion of primary spermatocyte cells that expressed genes in the different movement classes.
 The number of genes in the moved_on and moved_off classes are very low (< 10) which makes interpretation difficult.
 I decided to group genes into "Selection Favor" and "Selection Against" for all statistical analyses.
-Here I compare the distribution of the prorportion of cells using a Mann-Whitney U test.
+Here I compare the distribution of the proportion of cells using a Mann-Whitney U test.
 **We see an significant increase in primary spermatocyte expression for genes with "Selection Against" for all three Muller elements.**
 
 {{< tabs "cyte_dist" >}}
