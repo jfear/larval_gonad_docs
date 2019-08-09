@@ -85,7 +85,7 @@ Fisher's Exact Test: 0.47126741340750544
 {{< /tab >}}
 {{< tab "Muller D" >}}
 
-**Table 4. Number of genes with differential expression on Muller A.**
+**Table 4. Number of genes with differential expression on Muller D.**
 
 | bias | conserved | moved_on | gene_death | moved_off |
 |------|-----------|----------|------------|-----------|
@@ -93,7 +93,7 @@ Fisher's Exact Test: 0.47126741340750544
 | PS   | 23        | 1        | 8          | 6         |
 | EPS  | 82        | 0        | 7          | 2         |
 
-**Table 5. Number of genes with selection on Muller A.**
+**Table 5. Number of genes with selection on Muller D.**
 
 | bias       | Selection Favor | Selection Against |
 |------------|-----------------|-------------------|
@@ -105,7 +105,7 @@ Fisher's Exact Test: 0.0034996761816397386
 {{< /tab >}}
 {{< tab "Muller E" >}}
 
-**Table 6. Number of genes with differential expression on Muller A.**
+**Table 6. Number of genes with differential expression on Muller E.**
 
 | bias | conserved | moved_on | gene_death | moved_off |
 |------|-----------|----------|------------|-----------|
@@ -113,7 +113,7 @@ Fisher's Exact Test: 0.0034996761816397386
 | PS   | 42        | 2        | 15         | 1         |
 | EPS  | 116       | 1        | 7          | 2         |
 
-**Table 7. Number of genes with selection on Muller A.**
+**Table 7. Number of genes with selection on Muller E.**
 
 | bias       | Selection Favor | Selection Against |
 |------------|-----------------|-------------------|
